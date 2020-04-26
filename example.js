@@ -1,17 +1,20 @@
 var wscb = new WSClientBase("localhost", 8765, false);
+var foo = new FooPlugin(wscb);
+
+// Define a custom plugin welecome function
+foo.on_example = function(response) {
+    console.log("We got the example :)");
+}
+
+wscb.register(foo);
 
 // Define the on open function
 wscb.on_open = function() {
     wscb.auth("joe"); // <- Automatically attempt to authenticate a user named joe when connection is established
-    wscb.stop();
 }
 
 wscb.on_auth = function() {
-    console.log("Logged in  YAY");
-}
-
-wscb.on_auth_user_not_found = function() {
-    console.log("Couldn't find user :(");
+    foo.foo();
 }
 
 wscb.connect();

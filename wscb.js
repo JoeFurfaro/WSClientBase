@@ -1,4 +1,36 @@
 /*
+* The parent object used to create dynamic custom WSCB plugins
+*/
+class WSCBPlugin {
+    /*
+    * Create a new plugin instance
+    */
+    constructor(wscb) {
+        this.wscb = wscb;
+        this.handlers = {};
+    }
+
+    /*
+    * Returns the plugin handlers
+    */
+    get_handlers = function() {
+        return this.handlers;
+    }
+
+    /*
+    * Handles a server response targetted at the plugin should be developer defined
+    */
+    handle = function(response) { }
+
+    /*
+    * Sends a request to the WSSB server
+    */
+    request = function(data) {
+        this.wscb.request(data);
+    }
+}
+
+/*
 * The entry point object to using the WSClientBase library
 */
 class WSClientBase {
@@ -10,6 +42,13 @@ class WSClientBase {
         if(use_ssl)
             this.addr = "wss://" + server_address + ":" + server_port;
         this.plugins = [];
+    }
+
+    /*
+    * Registers a plugin instance
+    */
+    register = function(plugin_instance) {
+        this.plugins.push(plugin_instance);
     }
 
     /*
@@ -51,6 +90,9 @@ class WSClientBase {
 
             if(response.code in responses)
                 responses[response.code](response);
+
+            for(var plugin of this.wscb.plugins)
+                plugin.handle(response);
         }
     }
 
