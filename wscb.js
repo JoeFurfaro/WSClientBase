@@ -28,6 +28,12 @@ class WSCBPlugin {
     request = function(data) {
         this.wscb.request(data);
     }
+
+    /*
+    * These functions should be developer defined
+    */
+    on_open = function() {}
+    on_close = function() {}
 }
 
 /*
@@ -61,11 +67,15 @@ class WSClientBase {
         this.socket.onopen = function(e) {
             console.log("Connected to WSSB server on " + this.wscb.addr);
             this.wscb.on_open();
+            for(var plugin of this.wscb.plugins)
+                plugin.on_open();
         }
 
         this.socket.onclose = function(e) {
             console.log("Connection to WSSB server on " + this.wscb.addr + " has been closed");
             this.wscb.on_close();
+            for(var plugin of this.wscb.plugins)
+                plugin.on_close();
         }
 
         this.socket.onmessage = function(e) {
@@ -86,6 +96,7 @@ class WSClientBase {
                 WSSB_RELOADED: this.wscb.on_reload,
                 WSSB_PLUGINS_RELOADED: this.wscb.on_reload_plugins,
                 WSSB_USERS_RELOADED: this.wscb.on_reload_users,
+                WSSB_AUTH_FAILED: this.wscb.on_auth_failure,
             }
 
             if(response.code in responses)
@@ -172,6 +183,7 @@ class WSClientBase {
     on_auth_user_not_found = function(response) {}
     on_auth_invalid_syntax = function(response) {}
     on_auth = function(response) {}
+    on_auth_failure = function(response) {}
     on_kick = function(response) {}
     on_already_auth = function(response) {}
     on_not_auth = function(response) {}
